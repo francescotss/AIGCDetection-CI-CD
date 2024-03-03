@@ -5,5 +5,7 @@ opencv
 Pillow
 pytorch
 torchvision
+torchsummary
+matplotlib
 azure-ai-ml
 azure-identity
