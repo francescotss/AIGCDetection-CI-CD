@@ -7,3 +7,5 @@
 desktop.ini
 *.pyc
 /infos
+/datasets
+/checkpoints
