@@ -5,7 +5,7 @@ from tqdm import tqdm
 import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader
 from torch.nn import functional as F
-from common_functions import CustumDataset
+from utils.common_functions import CustumDataset
 import copy
 
 def _GetIndex(data_1):
