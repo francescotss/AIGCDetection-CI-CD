@@ -38,7 +38,6 @@ def create_dataloader(args):
     os.environ['CUDA_VISIBLE_DEVICES'] =str(args.num_gpu)
     set_seeds()
 
-    dict_source = args.source_datasets #TODO OrderedDict()
     source_datasets = args.source_datasets
     target_dataset = args.target_dataset_dir
 
@@ -61,7 +60,7 @@ def create_dataloader(args):
                                                     train_aug=train_aug,
                                                     val_aug=val_aug,
                                                     batch_size=args.batch_size)
-    return dicLoader, dicCoReD, dict_source
+    return dicLoader, dicCoReD
 
 
 
