@@ -31,6 +31,14 @@ def set_seeds(seed=2020):
         torch.manual_seed(seed)
         torch.cuda.manual_seed(seed)
         torch.cuda.manual_seed_all(seed)  # if use multi-GPU
+
+
+def ReduceWeightOnPlateau(weight, factor=0.8):
+    """
+        Reduce the conservative of the CL model
+    """
+    weight *= factor
+    return weight
         
 
 # def save_checkpoint(state, checkpoint='checkpoint', filename='checkpoint.pth.tar' , AUC_BEST = False, ACC_BEST = False):
@@ -90,9 +98,3 @@ def set_seeds(seed=2020):
 #         loss = torch.clamp(loss, min=min_val, max=max_val)
 #     return loss
 
-# def ReduceWeightOnPlateau(weight, factor=0.8):
-#     """
-#         Reduce the conservative of the CL model
-#     """
-#     weight *= factor
-#     return weight
