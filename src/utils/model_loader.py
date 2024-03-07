@@ -7,7 +7,7 @@ from networks.resnet import resnet18, resnet50
 from networks.xceptionnet import xception
 
 def load_models(weight, nameNet='ResNet', num_gpu='', TrainMode=True):
-    print("\n\n\n ------ Loading models 2 ------")
+    print("\n\n\n ------ Loading models ------")
     teacher_model, student_model = None,None
     device = 'cuda' if num_gpu else 'cpu'
     checkpoint = None
