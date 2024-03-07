@@ -15,10 +15,9 @@ from utils.save_model import save_checkpoint
 def parse_args():
     parser = argparse.ArgumentParser("train")
     parser.add_argument("-c", "--config_file", type=str, help='Config file')
-    parser.add_argument("--train_data", type=str, help="Path to train dataset")
-    parser.add_argument("--savepath", type=str, help="Output model save path")
-    
-    
+    parser.add_argument("--input_model", default='')
+    parser.add_argument("--output_path", default='./')
+
     args = parser.parse_args()
     assert args.config_file
 
@@ -26,9 +25,20 @@ def parse_args():
     config.read(args.config_file)
     defaults = {}
     defaults.update(dict(config.items("Defaults")))
+    
     parser.set_defaults(**defaults)
+
+    parser.add_argument("--target_name")
+    parser.add_argument("--target_dir")
+    parser.add_argument("--source_datasets")
+
     args = parser.parse_args()
 
+    args.target_name = next(iter(config["Target_Dataset"]))
+    args.target_dir = config["Target_Dataset"][args.target_name]
+    args.source_datasets = dict(config.items("Source_Datasets"))
+         
+    
     print(args)
     return args
 
@@ -40,16 +50,17 @@ def train(args):
 
     # Init
     device = 'cuda' if args.num_gpu else 'cpu'
-    lr = args.lr
-    alpha_kd = args.KD_alpha
-    num_class = args.num_class
-
+    lr = float(args.lr)
+    alpha_kd = float(args.kd_alpha)
+    epochs = int(args.epochs)
+    early_stop = int(args.early_stop)
+    decay_factor = float(args.decay_factor)
 
     # Load datasets and models
-    train_loaders, val_loaders = create_dataloader(args)
+    train_loaders, val_loaders = create_dataloader(args, train=True)
     print("Dataset available in train_loaders: ", " / ".join([n for n in train_loaders]))
     print("Dataset available in val_loaders: ", " / ".join([n for n in val_loaders]))
-    teacher_model, student_model = load_models(args.weight, args.network, num_gpu = args.num_gpu)
+    teacher_model, student_model = load_models(args.input_model, args.network, num_gpu = args.num_gpu)
     criterion = nn.CrossEntropyLoss().to(device)
     optimizer = optim.SGD(student_model.parameters(), lr=lr, momentum=0.1)
 
@@ -67,11 +78,11 @@ def train(args):
 
     best_acc = 0
     cur_patience = 0 # Early stop and saving
-    print(f"Start training in {args.epochs} epochs")
+    print(f"Start training in {epochs} epochs")
 
 
     # ------- START TRAINING ------- #
-    for epoch in range(args.epochs):
+    for epoch in range(epochs):
         correct,total = 0,0
         teacher_model.eval()
         student_model.train()
@@ -121,7 +132,7 @@ def train(args):
         # ----- Epoch Validation ------ #
 
         # Current task
-        _, test_acc = test_model(train_loaders['val'], student_model, criterion, device=device, source_name=args.name_target)
+        _, test_acc = test_model(train_loaders['val'], student_model, criterion, device=device, source_name=args.target_name)
         total_acc = test_acc
         print("[VAL Acc] Target: {:.2f}%".format(test_acc))
 
@@ -134,7 +145,7 @@ def train(args):
                 cnt += 1
         print("[VAL Acc] Avg {:.2f}%".format(total_acc / cnt))
 
-        # Early stop
+        
         is_best_acc = total_acc > best_acc
         if is_best_acc:
                 print("VAL Acc improve from {:.2f}% to {:.2f}%".format(best_acc/cnt, total_acc/cnt))
@@ -142,7 +153,7 @@ def train(args):
         else:
             cur_patience += 1
         if args.lr_schedule == "cosine" and (cur_patience > 0 and cur_patience % 4 == 0):
-                alpha_kd = ReduceWeightOnPlateau(alpha_kd, args.decay_factor)
+                alpha_kd = ReduceWeightOnPlateau(alpha_kd, decay_factor)
 
         # Save 
         best_acc = max(total_acc,best_acc)
@@ -156,8 +167,8 @@ def train(args):
             )
             print('Save best model')
 
-
-        if args.early_stop and (cur_patience == args.patience):
+        # Early stop
+        if cur_patience == early_stop:
             print("Early stopping ...")
             return 
         
@@ -169,8 +180,6 @@ def train(args):
 if __name__ == "__main__":
 
     args = parse_args()
-    
-    if args.savepath and not os.path.isdir(args.savepath):
-        os.makedirs(args.savepath)
+    train(args)
 
 

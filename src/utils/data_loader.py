@@ -33,13 +33,14 @@ class CustomDataset(Dataset):
 
 
 
-def create_dataloader(args):
+def create_dataloader(args, train:bool):
     print('\n\n\n------ Creating Loaders ------\nGPU num is' , args.num_gpu)
     os.environ['CUDA_VISIBLE_DEVICES'] =str(args.num_gpu)
     set_seeds()
 
     source_datasets = args.source_datasets
-    target_dataset = args.target_dataset_dir
+    target_dataset = args.target_dir
+    batch_size = int(args.batch_size)
 
     
 
@@ -53,21 +54,21 @@ def create_dataloader(args):
     #                                               name_target, train_aug=train_aug, val_aug=val_aug,
     #                                                batch_size=args.batch_size,
     #                                                TRAIN_MODE=args.train, MODE_BALANCED_DATA=False)
-    if args.train:
+    if train:
         print('\n===> Making Loader for Continual Learning..')
         training_loaders,testing_loaders = _make_train_dataloader(target_dataset, 
                                                     ds_source_dirs=source_datasets,
                                                     train_aug=train_aug,
                                                     val_aug=val_aug,
-                                                    batch_size=args.batch_size)
+                                                    batch_size=batch_size)
     return training_loaders, testing_loaders
 
 
 
 def _get_augs(args):
-    resize_func = transforms.RandomCrop(args.resolution, pad_if_needed=True)
+    resize_func = transforms.RandomCrop(int(args.resolution), pad_if_needed=True)
 
-    if args.flip:
+    if bool(args.flip):
         flip_func = transforms.RandomHorizontalFlip(p=0.5)
     else:
         flip_func = transforms.Lambda(lambda img: img)
@@ -127,8 +128,8 @@ def _make_train_dataloader(ds_target_dir,
     
     NUM_WORKERS = 2 #TODO: Implement in config
     
-    train_dir = os.path.join(ds_target_dir, 'train/')
-    val_target_dir = os.path.join(ds_target_dir, 'val/')
+    train_dir = os.path.join(ds_target_dir, 'train')
+    val_target_dir = os.path.join(ds_target_dir, 'val')
 
     assert os.path.exists(train_dir) and os.path.exists(val_target_dir), 'Training Dataset does not exist'
 
