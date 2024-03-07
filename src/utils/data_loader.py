@@ -55,12 +55,12 @@ def create_dataloader(args):
     #                                                TRAIN_MODE=args.train, MODE_BALANCED_DATA=False)
     if args.train:
         print('\n===> Making Loader for Continual Learning..')
-        dicLoader,dicCoReD = _make_train_dataloader(target_dataset, 
+        training_loaders,testing_loaders = _make_train_dataloader(target_dataset, 
                                                     ds_source_dirs=source_datasets,
                                                     train_aug=train_aug,
                                                     val_aug=val_aug,
                                                     batch_size=args.batch_size)
-    return dicLoader, dicCoReD
+    return training_loaders, testing_loaders
 
 
 
@@ -119,23 +119,24 @@ def _make_test_dataloader(dir,
 
 
 def _make_train_dataloader(ds_target_dir,
-                              ds_source_dirs:dict,
-                              name_target='',
-                              mode_CoReD = True,
-                              train_aug=None,
-                              val_aug=None,
-                              batch_size=128,
-                              ):
+                            ds_source_dirs:dict,
+                            train_aug=None,
+                            val_aug=None,
+                            batch_size=128,
+                            ):
     
-
-    loaders_dict = OrderedDict()
+    NUM_WORKERS = 2 #TODO: Implement in config
     
     train_dir = os.path.join(ds_target_dir, 'train/')
     val_target_dir = os.path.join(ds_target_dir, 'val/')
 
+    assert os.path.exists(train_dir) and os.path.exists(val_target_dir), 'Training Dataset does not exist'
+
     #For Validataion
-    NUM_WORKERS = 2
+    validation_loaders = OrderedDict()
     for name in ds_source_dirs:
+            assert os.path.exists(ds_source_dirs[name]), f"Validation Dataset {name} does not exist"
+
             print('===> Making Loader :', name)
             path = os.path.join(ds_source_dirs[name], "val")
             _loader = DataLoader(datasets.ImageFolder(path, val_aug),
@@ -144,7 +145,7 @@ def _make_train_dataloader(ds_target_dir,
                                             num_workers=NUM_WORKERS,
                                             pin_memory=True
                                             )
-            loaders_dict[f'val_source_{name}'] = copy.deepcopy(_loader)
+            validation_loaders[name] = copy.deepcopy(_loader)
 
 
 
@@ -153,9 +154,7 @@ def _make_train_dataloader(ds_target_dir,
     print('val_target_dir ' ,val_target_dir)
     print('train_dir ' ,train_dir)
 
-    #assert os.path.exists(train_dir) and os.path.exists(ds_source_dirs[0]) and os.path.exists(val_target_dir), 'Check PATH !!!'
-
-    train_target_loader, train_target_loader_forcorrect = None,None
+    
     train_target_dataset = datasets.ImageFolder(train_dir,transform=None)
     train_target_dataset = CustomDataset(np.array(train_target_dataset.samples)[:,0],np.array(train_target_dataset.targets),train_aug)
     
@@ -166,13 +165,6 @@ def _make_train_dataloader(ds_target_dir,
                                     pin_memory=True
                                     )
 
-    train_target_loader_forcorrect = DataLoader(train_target_dataset,
-                                                batch_size=batch_size,
-                                                shuffle=False,
-                                                num_workers=NUM_WORKERS,
-                                                pin_memory=True
-                                                )
-
     val_target_loader = DataLoader(datasets.ImageFolder(val_target_dir, val_aug),
                                 batch_size=batch_size,
                                 shuffle=False,
@@ -181,10 +173,8 @@ def _make_train_dataloader(ds_target_dir,
                                 )
 
     
-    loaders_dict['train_target'] = train_target_loader
-    loaders_dict['val_target'] = val_target_loader
-    dic_CoReD = {'train_target_dataset':train_target_dataset ,'train_target_forCorrect':train_target_loader_forcorrect}
+    train_loaders = OrderedDict()
+    train_loaders['train'] = train_target_loader
+    train_loaders['val'] = val_target_loader
 
-
-
-    return loaders_dict, dic_CoReD
+    return train_loaders, validation_loaders
