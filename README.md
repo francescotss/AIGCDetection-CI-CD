@@ -8,7 +8,7 @@ This project aims to incorporate continuous learning techniques into a real-worl
 
 ## Setup
 
-### Prerequisities
+### Prerequisites
 
 - Azure subscription
 - Azure [service principal](https://learn.microsoft.com/en-us/powershell/azure/create-azure-service-principal-azureps?view=azps-11.3.0)
@@ -18,7 +18,7 @@ This project aims to incorporate continuous learning techniques into a real-worl
 1. `.cloud` Azure Machine Learning IaC files for provisioning resources to train and deploy models
 2. `.github/workflows` GitHub Actions workflows. Used to automatically trigger the training pipeline on pull requests and the deployment pipeline on merges
 3. `pipeline` Azure Machine Learning pipeline definitions
-4. `notebooks` Notebooks for manage dataset upload and perform tests
+4. `notebooks` Notebooks for managing dataset upload and performing tests
 5. `src` Python code for train, evaluate, and deploy models
 
 #### 1. Deploy Infrastructure
@@ -62,7 +62,7 @@ dsname/test/
 #### 3. Train
 
 1. Using a feature branch, configure training in `model_config.conf`
-2. Push changes and create a pull request, it will trigger workflow to run the training pipeline
+2. Push changes and create a pull request, it will trigger a workflow to run the training pipeline
 
 #### 4. Validate and deploy
 
