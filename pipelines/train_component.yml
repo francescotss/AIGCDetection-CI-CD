@@ -1,0 +1,25 @@
+$schema: https://azuremlschemas.azureedge.net/latest/commandComponent.schema.json
+type: command
+
+name: train_model
+display_name: Train Model Component
+description: Training component
+
+inputs:
+  model_config: 
+    type: uri_file
+  input_model:
+    type: custom_model
+
+outputs:
+  model_output:
+    type: uri_file
+
+code: ../src
+environment: azureml://registries/azureml/environments/acpt-pytorch-2.1-cuda12.1/versions/5
+command: >-
+  python train.py 
+  --config_file ${{inputs.model_config}} 
+  --input_model ${{inputs.input_model}}
+  --output_filepath ${{outputs.model_output}}
+

@@ -1,0 +1,37 @@
+$schema: https://azuremlschemas.azureedge.net/latest/pipelineJob.schema.json
+type: pipeline
+display_name: train_pipeline
+description: Retrain deepfake detection model using only a new data samples
+
+inputs:
+  model_config:
+    type: uri_file
+    path: ../model_config.conf
+  input_model:
+    type: custom_model
+    path: azureml:detector_model@latest
+
+outputs:
+  best_model:
+    type: custom_model
+    name: detector_model
+    version: 'latest'
+
+
+settings:
+  default_datastore: azureml:workspaceblobstore
+  default_compute: azureml:cpu-cluster
+  continue_on_step_failure: false
+
+
+jobs:
+  train:
+    type: command
+    component: ./train_component.yml
+    compute: azureml:cpu-cluster
+    inputs:
+      model_config: ${{parent.inputs.model_config}}
+      input_model: ${{parent.inputs.input_model}}
+    outputs:
+      output_model: ${{parent.outputs.best_model}}
+    

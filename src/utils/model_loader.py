@@ -17,7 +17,7 @@ def load_models(weight, nameNet='ResNet', num_gpu='', TrainMode=True):
     
     if weight != "":
         print(f"Loading {nameNet} from {weight}")
-        checkpoint = torch.load(weight)  
+        checkpoint = torch.load(weight, map_location=device)  
     else:
         download_weights = True
         

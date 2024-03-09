@@ -16,7 +16,7 @@ def parse_args():
     parser = argparse.ArgumentParser("train")
     parser.add_argument("-c", "--config_file", type=str, help='Config file')
     parser.add_argument("--input_model", default='')
-    parser.add_argument("--output_path", default='./')
+    parser.add_argument("--output_filepath", default='./')
 
     args = parser.parse_args()
     assert args.config_file
@@ -157,13 +157,13 @@ def train(args):
 
         # Save 
         best_acc = max(total_acc,best_acc)
-        if  is_best_acc:
+        if  is_best_acc or epoch==0:
             save_checkpoint({
                 'epoch': epoch + 1,
                 'state_dict': student_model.state_dict(),
                 'best_acc': best_acc,
                 'optimizer': optimizer.state_dict()},
-            path=args.checkpoint_path
+            path=args.output_filepath
             )
             print('Save best model')
 
