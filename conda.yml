@@ -1,0 +1,13 @@
+name: model-env
+channels:
+  - conda-forge
+dependencies:
+  - scipy
+  - scikit-learn
+  - numpy
+  - opencv
+  - Pillow
+  - pytorch=2.1.2
+  - torchvision
+  - torchsummary
+  - matplotlib
