@@ -1,6 +1,6 @@
 # MLOps for Deepfake Detection
 
-![CI Train](https://github.com/github/docs/actions/workflows/model_train_workflow.yml/badge.svg)
+![CI Train](https://github.com/francescotss/MLOpsDeepfakeDetection/actions/workflows/model_train_workflow.yml/badge.svg)
 
 This project aims to incorporate continuous learning techniques into a real-world, end-to-end deepfake detection system that supports continuous integration and continuous delivery/deployment (CI/CD). Our implementation is a simple yet effective MLOps pipeline design that enables the end-to-end development of continuously trained and monitored intelligent detectors using a limited dataset.
 
