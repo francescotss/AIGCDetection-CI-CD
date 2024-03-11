@@ -17,6 +17,8 @@ def parse_args():
     parser.add_argument("-c", "--config_file", type=str, help='Config file')
     parser.add_argument("--input_model", default='')
     parser.add_argument("--output_filepath", default='./')
+    parser.add_argument("--target_dir")
+    parser.add_argument("--source_datasets")
 
     args = parser.parse_args()
     assert args.config_file
@@ -28,15 +30,14 @@ def parse_args():
     
     parser.set_defaults(**defaults)
 
-    parser.add_argument("--target_name")
-    parser.add_argument("--target_dir")
-    parser.add_argument("--source_datasets")
+    #parser.add_argument("--target_name")
+
 
     args = parser.parse_args()
 
-    args.target_name = next(iter(config["Target_Dataset"]))
-    args.target_dir = config["Target_Dataset"][args.target_name]
-    args.source_datasets = dict(config.items("Source_Datasets"))
+    # args.target_name = next(iter(config["Target_Dataset"]))
+    # args.target_dir = config["Target_Dataset"][args.target_name]
+    # args.source_datasets = dict(config.items("Source_Datasets"))
          
     
     print(args)
@@ -132,7 +133,7 @@ def train(args):
         # ----- Epoch Validation ------ #
 
         # Current task
-        _, test_acc = test_model(train_loaders['val'], student_model, criterion, device=device, source_name=args.target_name)
+        _, test_acc = test_model(train_loaders['val'], student_model, criterion, device=device, source_name=args.target_dir)
         total_acc = test_acc
         print("[VAL Acc] Target: {:.2f}%".format(test_acc))
 
@@ -163,7 +164,7 @@ def train(args):
                 'state_dict': student_model.state_dict(),
                 'best_acc': best_acc,
                 'optimizer': optimizer.state_dict()},
-            path=args.output_filepath
+            filepath=args.output_filepath
             )
             print('Save best model')
 

@@ -9,13 +9,23 @@ inputs:
     path: ../model_config.conf
   input_model:
     type: custom_model
-    path: azureml:detector_model@latest
+    path: azureml:prod_model@latest  
+  target_dataset:
+    type: uri_folder
+    path: azureml:biggan@latest
+  source_dataset1:
+    type: uri_folder
+    path: azureml:gaugan@latest
+  source_dataset2:
+    type: uri_folder
+    path: azureml:cyclegan@latest
+
 
 outputs:
   best_model:
     type: custom_model
-    name: detector_model
-    version: 'latest'
+    name: dev_model
+    version: 2
 
 
 settings:
@@ -32,6 +42,9 @@ jobs:
     inputs:
       model_config: ${{parent.inputs.model_config}}
       input_model: ${{parent.inputs.input_model}}
+      target_dataset: ${{parent.inputs.target_dataset}}
+      source_dataset1: ${{parent.inputs.source_dataset1}}
+      source_dataset2: ${{parent.inputs.source_dataset2}}
     outputs:
       output_model: ${{parent.outputs.best_model}}
     

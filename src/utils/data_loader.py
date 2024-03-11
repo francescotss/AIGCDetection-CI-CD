@@ -120,7 +120,7 @@ def _make_test_dataloader(dir,
 
 
 def _make_train_dataloader(ds_target_dir,
-                            ds_source_dirs:dict,
+                            ds_source_dirs,
                             train_aug=None,
                             val_aug=None,
                             batch_size=128,
@@ -135,11 +135,11 @@ def _make_train_dataloader(ds_target_dir,
 
     #For Validataion
     validation_loaders = OrderedDict()
-    for name in ds_source_dirs:
-            assert os.path.exists(ds_source_dirs[name]), f"Validation Dataset {name} does not exist"
+    for name in ds_source_dirs.split(','):
+            assert os.path.exists(name), f"Validation Dataset {name} does not exist"
 
             print('===> Making Loader :', name)
-            path = os.path.join(ds_source_dirs[name], "val")
+            path = os.path.join(name, "val")
             _loader = DataLoader(datasets.ImageFolder(path, val_aug),
                                             batch_size=batch_size,
                                             shuffle=False,

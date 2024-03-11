@@ -10,10 +10,17 @@ inputs:
     type: uri_file
   input_model:
     type: custom_model
+  target_dataset:
+    type: uri_folder
+  source_dataset1:
+    type: uri_folder
+  source_dataset2:
+    type: uri_folder
 
+  
 outputs:
   model_output:
-    type: uri_file
+    type: custom_model
 
 code: ../src
 environment: azureml://registries/azureml/environments/acpt-pytorch-2.1-cuda12.1/versions/5
@@ -22,4 +29,7 @@ command: >-
   --config_file ${{inputs.model_config}} 
   --input_model ${{inputs.input_model}}
   --output_filepath ${{outputs.model_output}}
+  --target_dir ${{inputs.target_dataset}}
+  --source_datasets ${{inputs.source_dataset1}},${{inputs.source_dataset2}}
+
 
