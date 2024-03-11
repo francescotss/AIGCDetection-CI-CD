@@ -164,7 +164,7 @@ def train(args):
                 'state_dict': student_model.state_dict(),
                 'best_acc': best_acc,
                 'optimizer': optimizer.state_dict()},
-            filepath=args.output_filepath
+            path=args.output_filepath
             )
             print('Save best model')
 

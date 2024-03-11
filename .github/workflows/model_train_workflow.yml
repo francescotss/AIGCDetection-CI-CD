@@ -2,10 +2,8 @@ name: CI-Train
 
 on: 
   pull_request:
-    types: 
-        - opened
-        - reopened
-
+    branches:
+      - main
 jobs:
   get-config:
       uses: Azure/mlops-templates/.github/workflows/read-yaml.yml@main
