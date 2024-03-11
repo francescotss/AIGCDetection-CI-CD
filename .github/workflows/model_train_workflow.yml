@@ -4,8 +4,7 @@ on:
   pull_request:
     types: 
         - opened
-    branches: 
-        - 'training**'
+
 jobs:
   get-config:
       uses: Azure/mlops-templates/.github/workflows/read-yaml.yml@main
