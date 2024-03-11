@@ -4,12 +4,13 @@ on:
   pull_request:
     types: 
         - opened
+        - reopened
 
 jobs:
   get-config:
       uses: Azure/mlops-templates/.github/workflows/read-yaml.yml@main
       with:
-        file_name: config-infra-prod.yml
+        file_name: .cloud/config-infra-prod.yml
       
   create-compute:
       needs: [get-config]
