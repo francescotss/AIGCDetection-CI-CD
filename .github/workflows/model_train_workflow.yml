@@ -1,4 +1,4 @@
-name: deploy-model-training-pipeline
+name: CI-Train
 
 on: 
   pull_request:
