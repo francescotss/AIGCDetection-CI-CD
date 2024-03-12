@@ -13,6 +13,10 @@ def load_models(weight, nameNet='ResNet', num_gpu='', TrainMode=True):
     checkpoint = None
     download_weights = False
     
+
+    if os.path.isdir(weight):
+        weight = os.path.join(weight, 'model.pth')
+        
     assert weight == "" or os.path.isfile(weight), "Pretrained weights not found"
     
     if weight != "":
