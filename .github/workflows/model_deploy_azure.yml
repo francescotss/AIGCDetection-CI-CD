@@ -1,0 +1,49 @@
+name: CD-Deploy
+
+on: 
+  workflow_dispatch:
+  push:
+    branches:
+        - 'main'
+
+jobs:
+  get-config:
+      uses: Azure/mlops-templates/.github/workflows/read-yaml.yml@main
+      with:
+        file_name: .cloud/config-infra-prod.yml
+
+  create-endpoint:
+      needs: get-config
+      uses: Azure/mlops-templates/.github/workflows/create-endpoint.yml@main
+      with:
+        resource_group: ${{ needs.get-config.outputs.resource_group }}
+        workspace_name: ${{ needs.get-config.outputs.aml_workspace }} 
+        endpoint_file: pipelines/deploy_endpoint.yml
+        endpoint_name: deepfake-detector-ep
+        endpoint_type: online
+      secrets:
+        creds: ${{secrets.AZURE_CREDENTIALS}}
+
+  create-deployment:
+      uses: Azure/mlops-templates/.github/workflows/create-deployment.yml@main
+      needs: [get-config,create-endpoint]
+      with:
+        resource_group: ${{ needs.get-config.outputs.resource_group }}
+        workspace_name: ${{ needs.get-config.outputs.aml_workspace }} 
+        endpoint_file: pipelines/deploy.yml
+        endpoint_name: deepfake-detector-ep
+        endpoint_type: online
+        deployment_name: detector-dp
+      secrets:
+        creds: ${{secrets.AZURE_CREDENTIALS}}
+
+  allocate-traffic:
+      uses: Azure/mlops-templates/.github/workflows/allocate-traffic.yml@main
+      needs: [get-config,create-deployment]
+      with:
+        resource_group: ${{ needs.get-config.outputs.resource_group }}
+        workspace_name: ${{ needs.get-config.outputs.aml_workspace }} 
+        traffic_allocation: detector-dp=100
+        endpoint_name: deepfake-detector-ep
+      secrets:
+        creds: ${{secrets.AZURE_CREDENTIALS}}
