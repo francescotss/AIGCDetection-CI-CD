@@ -1,0 +1,36 @@
+name: CI-Train
+
+on: 
+  pull_request:
+    branches:
+      - main
+jobs:
+  get-config:
+      uses: Azure/mlops-templates/.github/workflows/read-yaml.yml@main
+      with:
+        file_name: .cloud/config-infra-prod.yml
+      
+  create-compute:
+      needs: [get-config]
+      uses: Azure/mlops-templates/.github/workflows/create-compute.yml@main
+      with:
+        cluster_name: cpu-cluster
+        size: Standard_DS3_v2
+        min_instances: 0
+        max_instances: 1
+        cluster_tier: dedicated
+        resource_group: ${{ needs.get-config.outputs.resource_group }}
+        workspace_name: ${{ needs.get-config.outputs.aml_workspace }}     
+      secrets:
+          creds: ${{secrets.AZURE_CREDENTIALS}}
+      
+  run-pipeline:
+      needs: [get-config,create-compute]
+      uses: Azure/mlops-templates/.github/workflows/run-pipeline.yml@main
+      with:
+        resource_group: ${{ needs.get-config.outputs.resource_group }}
+        workspace_name: ${{ needs.get-config.outputs.aml_workspace }}     
+        parameters-file:  pipelines/train_pipeline.yml
+        job-name: Train-job
+      secrets:
+          creds: ${{secrets.AZURE_CREDENTIALS}}
