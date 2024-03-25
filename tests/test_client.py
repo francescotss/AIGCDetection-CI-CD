@@ -20,12 +20,17 @@ def test_client(endpoint_url, endpoint_key, img):
     data['image'] = base64.encodebytes(img).decode('utf-8')
     raw_data = json.dumps(data)
 
-    headers = {"Authorization": f"Bearer {endpoint_key}"}
-    res = requests.post(endpoint_url, json=raw_data, headers=headers)
+    headers = {'Content-Type':'application/json',
+               "Authorization": f"Bearer {endpoint_key}"
+               }
+    res = requests.post(endpoint_url, data=raw_data, headers=headers)
 
-    print(res.status_code)
-   # if res.status_code != 
-    print(res.json())
+    print(res.status_code, res.reason)
+    if res.json() == 0:
+        print("The image is real")
+    else:
+        print("The image is AI generated")
+
 
 
 
