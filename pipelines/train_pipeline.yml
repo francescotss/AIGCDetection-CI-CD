@@ -25,7 +25,7 @@ outputs:
   best_model:
     type: custom_model
     name: dev_model
-    version: 2
+    version: 3
 
 
 settings:
