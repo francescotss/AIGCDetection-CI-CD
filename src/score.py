@@ -5,8 +5,6 @@ from PIL import Image
 
 import torch
 from torchvision.transforms.functional import pil_to_tensor, normalize, crop
-from utils.model_loader import load_models
-
 
 def parse_args():
     parser = argparse.ArgumentParser("score")
