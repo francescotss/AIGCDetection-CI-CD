@@ -2,6 +2,9 @@
 
 ![CI Train](https://github.com/francescotss/MLOpsDeepfakeDetection/actions/workflows/model-train-workflow.yml/badge.svg) ![CD Deploy](https://github.com/francescotss/MLOpsDeepfakeDetection/actions/workflows/model-deploy-azure.yml/badge.svg)
 
+![scheme](https://github.com/francescotss/MLOpsDeepfakeDetection/assets/44005266/5052a819-2f77-43b7-8b8c-8649e12fe1ee)
+
+
 This project aims to incorporate continuous learning techniques into a real-world, end-to-end deepfake detection system that supports continuous integration and continuous delivery/deployment (CI/CD). Our implementation is a simple yet effective MLOps pipeline design that enables the end-to-end development of continuously trained and monitored intelligent detectors using a limited dataset.
 
 ## Architecture
