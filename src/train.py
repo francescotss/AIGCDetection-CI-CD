@@ -155,7 +155,7 @@ def train(args):
                 _, source_acc = test_model(val_loaders[source_name], student_model, criterion, device=device, source_name=source_name)
                 total_acc += source_acc
                 print("[VAL Acc] Source {}: {:.2f}%".format(source_name, source_acc))
-                if logger: logger.log_metric(f'acc/{source_name}_val_acc', test_acc, step=step, epoch=epoch)
+                if logger: logger.log_metric(f'acc/{source_name}_val_acc', source_acc, step=step, epoch=epoch)
                 cnt += 1
         print("[VAL Acc] Avg {:.2f}%".format(total_acc / cnt))
         if logger: logger.log_metric('acc/val_acc', total_acc/cnt, step=step, epoch=epoch)
