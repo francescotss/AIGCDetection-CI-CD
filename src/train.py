@@ -76,20 +76,21 @@ def train(args):
                                         eta_min=1e-5,
                                         verbose=True)
     else:
+        lr_scheduler = None
         print(f"Input: {args.lr_schedule}, No learning rate schedule applied ... ")
         
 
     # Pre-evaluation
     _, test_acc = test_model(train_loaders['val'], student_model, criterion, device=device) 
     if logger: logger.log_metric('start_acc',test_acc,0)
+    print("Start Target Validation ACC: {:.2f}%".format(test_acc))
 
 
+    # ------- START TRAINING ------- #
     best_acc = 0
     cur_patience = 0 # Early stop and saving
     print(f"Start training in {epochs} epochs")
 
-
-    # ------- START TRAINING ------- #
     for epoch in range(epochs):
         correct,total = 0,0
         teacher_model.eval()
@@ -138,7 +139,7 @@ def train(args):
             total += len(targets)
 
         # Learning rate scheduler step
-        lr_scheduler.step()
+        if lr_scheduler: lr_scheduler.step()
 
 
         # ----- Epoch Validation ------ #
@@ -163,8 +164,8 @@ def train(args):
         
         is_best_acc = total_acc > best_acc
         if is_best_acc:
-                print("VAL Acc improve from {:.2f}% to {:.2f}%".format(best_acc/cnt, total_acc/cnt))
-                cur_patience = 0
+            print("VAL Acc improve from {:.2f}% to {:.2f}%".format(best_acc/cnt, total_acc/cnt))
+            cur_patience = 0
         else:
             cur_patience += 1
         if args.lr_schedule == "cosine" and (cur_patience > 0 and cur_patience % 4 == 0):
