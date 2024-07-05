@@ -52,11 +52,11 @@ def load_models(weight, nameNet='ResNet', num_gpu='', TrainMode=True):
             if 'model' in checkpoint:
                 teacher_model.load_state_dict(checkpoint['model'])
                 student_model.load_state_dict(checkpoint['model'])
-                teacher_model.compability_layer = nn.Linear(1, 2, bias=False)
-                student_model.compability_layer = nn.Linear(1, 2, bias=False)
+                teacher_model.compability_layer = nn.Linear(1, 2, bias=False) # type: ignore
+                student_model.compability_layer = nn.Linear(1, 2, bias=False) # type: ignore
             else:
-                teacher_model.compability_layer = nn.Linear(1, 2, bias=False)
-                student_model.compability_layer = nn.Linear(1, 2, bias=False)
+                teacher_model.compability_layer = nn.Linear(1, 2, bias=False) # type: ignore
+                student_model.compability_layer = nn.Linear(1, 2, bias=False) # type: ignore
                 teacher_model.load_state_dict(checkpoint['state_dict'])
                 student_model.load_state_dict(checkpoint['state_dict'])
                 
@@ -67,8 +67,8 @@ def load_models(weight, nameNet='ResNet', num_gpu='', TrainMode=True):
             teacher_model.load_state_dict(checkpoint['state_dict'])
             student_model.load_state_dict(checkpoint['state_dict'])
     elif nameNet=='ResNet18' or nameNet=='ResNet':
-        teacher_model.compability_layer = nn.Linear(1, 2, bias=False)
-        student_model.compability_layer = nn.Linear(1, 2, bias=False)
+        teacher_model.compability_layer = nn.Linear(1, 2, bias=False) # type: ignore
+        student_model.compability_layer = nn.Linear(1, 2, bias=False) # type: ignore
         teacher_model.compability_layer.weight = nn.Parameter(torch.tensor([[0], [1.]]), requires_grad=False)
         student_model.compability_layer.weight = nn.Parameter(torch.tensor([[0], [1.]]), requires_grad=False)
         

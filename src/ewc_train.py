@@ -160,8 +160,9 @@ def ewc_train(args):
         tot_ewc_loss, tot_task_loss = 0.0, 0.0
         model.train()
 
-        for inputs, targets in train_loader:
+        for batch_idx, (inputs, targets) in enumerate(train_loader):
             # Load data
+            step = (batch_idx+1) * (epoch+1)
             inputs = inputs.to(device).to(torch.float32)
             targets = targets.to(device).to(torch.long)
 
@@ -172,6 +173,10 @@ def ewc_train(args):
             task_loss = criterion(outputs, targets)
             ewc_loss = importance * ewc.penalty(model)
             loss = task_loss + ewc_loss
+
+            # Display
+            print("Train Epoch: {e:03d} Batch: {batch:05d}/{size:05d} | Loss: {loss:.4f} | EWC Loss: {ewc:.4f} | CE Loss: {ce:.4f}"
+                            .format(e=epoch, batch=batch_idx+1, size=len(train_loader), loss=loss.item(), ewc=ewc_loss, ce=task_loss))
 
             # Learn
             optimizer.zero_grad()
