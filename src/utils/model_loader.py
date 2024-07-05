@@ -15,9 +15,9 @@ def load_models(weight, nameNet='ResNet', num_gpu='', TrainMode=True):
     
 
     if os.path.isdir(weight):
-        weight = os.path.join(weight, 'model.pth')
+        weight = os.path.join(weight, 'model_best_accuracy.pth')
         
-    assert weight == "" or os.path.isfile(weight), "Pretrained weights not found"
+    assert weight == "" or os.path.isfile(weight), f"Pretrained weights {weight} not found"
     
     if weight != "":
         print(f"Loading {nameNet} from {weight}")

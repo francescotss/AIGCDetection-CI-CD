@@ -1,24 +1,16 @@
 import argparse, configparser
-import os
-import torch
-import torch.nn as nn
-import torch.optim as optim
-from torch.optim.lr_scheduler import CosineAnnealingLR
 
-from utils.data_loader import create_dataloader
-from utils.model_loader import load_models
-from utils.loss import loss_fn_kd, loss_clampping
-from utils.test_model import test_model
-from utils.train_utils import ReduceWeightOnPlateau
-from utils.save_model import save_checkpoint
 
 def parse_args():
     parser = argparse.ArgumentParser("train")
-    parser.add_argument("-c", "--config_file", type=str, help='Config file')
-    parser.add_argument("--input_model", default='')
-    parser.add_argument("--output_filepath", default='./')
-    parser.add_argument("--target_dir")
-    parser.add_argument("--source_datasets")
+    parser.add_argument("-c", "--config_file", default="model_config.conf", type=str, help='Config file')
+    parser.add_argument("--network", help="Supported Networks: ResNet, ResNet18, Xception, MobileNet2")
+    parser.add_argument("--input_model")
+    parser.add_argument("--output_dir")
+    parser.add_argument("--source_datasets", help="comma-separated list of directories. Example: /datasets/ds1,/datasets/ds2")
+    parser.add_argument("--target_dataset", help="Target dataset directory")
+    parser.add_argument("--use_comet", action=argparse.BooleanOptionalAction, default=False)
+    parser.add_argument("--comet_name", help="Experiment name for comet logging")
 
     args = parser.parse_args()
     assert args.config_file
@@ -29,17 +21,8 @@ def parse_args():
     defaults.update(dict(config.items("Defaults")))
     
     parser.set_defaults(**defaults)
-
-    #parser.add_argument("--target_name")
-
-
     args = parser.parse_args()
 
-    # args.target_name = next(iter(config["Target_Dataset"]))
-    # args.target_dir = config["Target_Dataset"][args.target_name]
-    # args.source_datasets = dict(config.items("Source_Datasets"))
-         
-    
     print(args)
     return args
 
@@ -48,6 +31,18 @@ def parse_args():
 
 
 def train(args):
+    # We need to do the imports AFTER the logger init
+    import torch
+    import torch.nn as nn
+    import torch.optim as optim
+    from torch.optim.lr_scheduler import CosineAnnealingLR
+
+    from utils.data_loader import create_dataloader
+    from utils.model_loader import load_models
+    from utils.loss import loss_fn_kd, loss_clampping
+    from utils.test_model import test_model
+    from utils.train_utils import ReduceWeightOnPlateau
+    from utils.save_model import save_checkpoint
 
     # Init
     device = 'cuda' if args.num_gpu else 'cpu'
@@ -56,6 +51,14 @@ def train(args):
     epochs = int(args.epochs)
     early_stop = int(args.early_stop)
     decay_factor = float(args.decay_factor)
+
+    # Logger
+    logger = None
+    if args.use_comet:
+        comet_ml.init()
+        logger = comet_ml.Experiment()
+        logger.set_name(args.comet_name)
+        logger.log_parameters(parameters=vars(args))
 
     # Load datasets and models
     train_loaders, val_loaders = create_dataloader(args, train=True)
@@ -75,6 +78,10 @@ def train(args):
     else:
         print(f"Input: {args.lr_schedule}, No learning rate schedule applied ... ")
         
+
+    # Pre-evaluation
+    _, test_acc = test_model(train_loaders['val'], student_model, criterion, device=device) 
+    if logger: logger.log_metric('start_acc',test_acc,0)
 
 
     best_acc = 0
@@ -110,6 +117,10 @@ def train(args):
             loss = loss_main  + alpha_kd*loss_kd
             
             # Log and display
+            if logger:
+                 logger.log_metric('losses/loss', loss.item(), step)
+                 logger.log_metric('losses/loss_main', loss_main.item(), step)
+                 logger.log_metric('losses/loss_kd', loss_kd.item(), step)
             disp["CE"] = loss_main.item()
             disp["KD"] = loss_kd.item() if loss_kd > 0 else 0.0
             call = ' | '.join(["{}: {:.4f}".format(k, v) for k, v in disp.items()])
@@ -133,9 +144,10 @@ def train(args):
         # ----- Epoch Validation ------ #
 
         # Current task
-        _, test_acc = test_model(train_loaders['val'], student_model, criterion, device=device, source_name=args.target_dir)
+        _, test_acc = test_model(train_loaders['val'], student_model, criterion, device=device)
         total_acc = test_acc
         print("[VAL Acc] Target: {:.2f}%".format(test_acc))
+        if logger: logger.log_metric('acc/target_val_acc', test_acc, step=step, epoch=epoch)
 
         # Past tasks
         cnt = 1
@@ -143,8 +155,10 @@ def train(args):
                 _, source_acc = test_model(val_loaders[source_name], student_model, criterion, device=device, source_name=source_name)
                 total_acc += source_acc
                 print("[VAL Acc] Source {}: {:.2f}%".format(source_name, source_acc))
+                if logger: logger.log_metric(f'acc/{source_name}_val_acc', test_acc, step=step, epoch=epoch)
                 cnt += 1
         print("[VAL Acc] Avg {:.2f}%".format(total_acc / cnt))
+        if logger: logger.log_metric('acc/val_acc', total_acc/cnt, step=step, epoch=epoch)
 
         
         is_best_acc = total_acc > best_acc
@@ -164,15 +178,17 @@ def train(args):
                 'state_dict': student_model.state_dict(),
                 'best_acc': best_acc,
                 'optimizer': optimizer.state_dict()},
-            path=args.output_filepath
+            path=args.output_dir
             )
             print('Save best model')
 
         # Early stop
         if cur_patience == early_stop:
             print("Early stopping ...")
+            if logger: logger.end()
             return 
         
+    if logger: logger.end()     
     return 
         
 
@@ -181,6 +197,12 @@ def train(args):
 if __name__ == "__main__":
 
     args = parse_args()
+
+    if args.use_comet:
+         import dotenv
+         import comet_ml
+         dotenv.load_dotenv()
+    
     train(args)
 
 

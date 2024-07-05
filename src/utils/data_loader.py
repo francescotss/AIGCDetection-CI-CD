@@ -39,7 +39,7 @@ def create_dataloader(args, train:bool):
     set_seeds()
 
     source_datasets = args.source_datasets
-    target_dataset = args.target_dir
+    target_dataset = args.target_dataset
     batch_size = int(args.batch_size)
 
     
