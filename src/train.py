@@ -107,7 +107,7 @@ def train(args):
 
             # Forward
             teacher_outputs = teacher_model(inputs)
-            penul_ft, outputs = student_model(inputs, True)
+            outputs = student_model(inputs)
 
             # KD loss
             loss_main = criterion(outputs, targets)
@@ -174,13 +174,16 @@ def train(args):
         # Save 
         best_acc = max(total_acc,best_acc)
         if  is_best_acc or epoch==0:
-            save_checkpoint({
-                'epoch': epoch + 1,
-                'state_dict': student_model.state_dict(),
-                'best_acc': best_acc,
-                'optimizer': optimizer.state_dict()},
-            path=args.output_dir
-            )
+            if args.network=="ViT":
+                save_checkpoint(model=student_model, path=args.output_dir)
+            else:   
+                save_checkpoint({
+                    'epoch': epoch + 1,
+                    'state_dict': student_model.state_dict(),
+                    'best_acc': best_acc,
+                    'optimizer': optimizer.state_dict()},
+                path=args.output_dir
+                )
             print('Save best model')
 
         # Early stop

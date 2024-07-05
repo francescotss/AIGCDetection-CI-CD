@@ -174,7 +174,11 @@ def ewc_train(args):
             ewc_loss = importance * ewc.penalty(model)
             loss = task_loss + ewc_loss
 
-            # Display
+            # Log and display
+            if logger:
+                logger.log_metric('losses/loss', loss, step=step)
+                logger.log_metric('losses/loss_main', task_loss, step=step)
+                logger.log_metric('losses/loss_ewc', ewc_loss, step=step)
             print("Train Epoch: {e:03d} Batch: {batch:05d}/{size:05d} | Loss: {loss:.4f} | EWC Loss: {ewc:.4f} | CE Loss: {ce:.4f}"
                             .format(e=epoch, batch=batch_idx+1, size=len(train_loader), loss=loss.item(), ewc=ewc_loss, ce=task_loss))
 
@@ -199,10 +203,10 @@ def ewc_train(args):
 
         # Logging
         if logger:
-            logger.log_metric('losses/loss', tot_loss, epoch)
-            logger.log_metric('losses/loss_main', epoch_task_loss, epoch)
-            logger.log_metric('losses/loss_ewc', epoch_ewc_loss, epoch)
-            logger.log_metric('acc/train_acc', acc, epoch)
+            logger.log_metric('losses/loss', tot_loss, epoch=epoch)
+            logger.log_metric('losses/loss_main', epoch_task_loss, epoch=epoch)
+            logger.log_metric('losses/loss_ewc', epoch_ewc_loss, epoch=epoch)
+            logger.log_metric('acc/train_acc', acc, epoch=epoch)
         print(f"Train Epoch: {epoch:03d} |Acc {acc:0.5f} | Loss: {tot_loss:.5f} | Task Loss {epoch_task_loss:.5f} | EWC Loss: {epoch_ewc_loss:.5f}")
 
         # Learning rate scheduler step

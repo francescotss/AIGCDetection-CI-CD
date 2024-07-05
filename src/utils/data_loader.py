@@ -72,25 +72,31 @@ def _get_augs(args):
         flip_func = transforms.RandomHorizontalFlip(p=0.5)
     else:
         flip_func = transforms.Lambda(lambda img: img)
+
+    if args.network == "ViT":
+        normalize_func = transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
+    else:
+        normalize_func = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+
         
     train_aug = transforms.Compose([
         resize_func,
         flip_func,
         transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+        normalize_func,
     ])
 
     val_aug = transforms.Compose([
         resize_func,
         transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+        normalize_func,
     ])
 
     return train_aug, val_aug
 
 
 
-#TODO: create multiple dataloaders
+#TODO
 def _make_test_dataloader(dir,
                     name_source,
                     name_target,
