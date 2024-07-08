@@ -4,7 +4,7 @@ import argparse, configparser
 def parse_args():
     parser = argparse.ArgumentParser("train")
     parser.add_argument("-c", "--config_file", default="model_config.conf", type=str, help='Config file')
-    parser.add_argument("--network", help="Supported Networks: ResNet, ResNet18, Xception, MobileNet2")
+    parser.add_argument("--network", help="Supported Networks: ResNet, ResNet18, Xception, MobileNet2, ViT")
     parser.add_argument("--input_model")
     parser.add_argument("--output_dir")
     parser.add_argument("--source_datasets", help="comma-separated list of directories. Example: /datasets/ds1,/datasets/ds2")
@@ -23,7 +23,6 @@ def parse_args():
     parser.set_defaults(**defaults)
     args = parser.parse_args()
 
-    print(args)
     return args
 
 

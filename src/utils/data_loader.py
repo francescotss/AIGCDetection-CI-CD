@@ -39,52 +39,53 @@ def create_dataloader(args, train:bool):
     set_seeds()
 
     source_datasets = args.source_datasets
-    target_dataset = args.target_dataset
     batch_size = int(args.batch_size)
+
 
     
 
-    #train & valid
-    train_aug, val_aug = _get_augs(args)
-    #if not args.train: # Test
-    #    print(f"\n===> Starting Test data loader from {path_data}")
-    #    print("Source:", dict_source['source'])
-    #    print("Target:", name_target)
-    #   dicLoader,dicCoReD = _make_test_dataloader(path_data, dict_source['source'],
-    #                                               name_target, train_aug=train_aug, val_aug=val_aug,
-    #                                                batch_size=args.batch_size,
-    #                                                TRAIN_MODE=args.train, MODE_BALANCED_DATA=False)
     if train:
         print('\n===> Making Loader for Continual Learning..')
+        target_dataset = args.target_dataset
+        train_aug, val_aug = _get_augs(args, True)
         training_loaders,testing_loaders = _make_train_dataloader(target_dataset, 
                                                     ds_source_dirs=source_datasets,
                                                     train_aug=train_aug,
                                                     val_aug=val_aug,
                                                     batch_size=batch_size)
-    return training_loaders, testing_loaders
-
-
-
-def _get_augs(args):
-    resize_func = transforms.RandomCrop(int(args.resolution), pad_if_needed=True)
-
-    if bool(args.flip):
-        flip_func = transforms.RandomHorizontalFlip(p=0.5)
+        return training_loaders, testing_loaders
     else:
-        flip_func = transforms.Lambda(lambda img: img)
+        print('\n===> Making Loader Testing')
+        _, val_aug = _get_augs(args, False)
+        return _make_test_dataloader(source_datasets, val_aug=val_aug,batch_size=batch_size)
+
+        
+    
+    
+
+
+
+def _get_augs(args, train):
+    resize_func = transforms.RandomCrop(int(args.resolution), pad_if_needed=True)
 
     if args.network == "ViT":
         normalize_func = transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
     else:
         normalize_func = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 
-        
-    train_aug = transforms.Compose([
-        resize_func,
-        flip_func,
-        transforms.ToTensor(),
-        normalize_func,
-    ])
+    train_aug = None
+    if train:
+        if bool(args.flip):
+            flip_func = transforms.RandomHorizontalFlip(p=0.5)
+        else:
+            flip_func = transforms.Lambda(lambda img: img)
+
+        train_aug = transforms.Compose([
+            resize_func,
+            flip_func,
+            transforms.ToTensor(),
+            normalize_func,
+        ])
 
     val_aug = transforms.Compose([
         resize_func,
@@ -96,32 +97,28 @@ def _get_augs(args):
 
 
 
-#TODO
-def _make_test_dataloader(dir,
-                    name_source,
-                    name_target,
-                    name_mixed_folder='',
-                    train_aug=None,
-                    val_aug=None,
-                    batch_size=128,
-                    TRAIN_MODE=True,
-                    MODE_BALANCED_DATA = False
-                    ):
+
+def _make_test_dataloader(paths, val_aug=None, batch_size=128):
+
+    NUM_WORKERS = 2 #TODO: Implement in config
+
+    #For Validataion
+    validation_loaders = OrderedDict()
+    for name in paths.split(','):
+            path = os.path.join(name, "test")
+            assert os.path.exists(path), f"Validation Dataset {path} does not exist"
+
+            print('===> Making Loader :', path)
+            _loader = DataLoader(datasets.ImageFolder(path, val_aug),
+                                            batch_size=batch_size,
+                                            shuffle=False,
+                                            num_workers=NUM_WORKERS,
+                                            pin_memory=True
+                                            )
+            validation_loaders[name] = copy.deepcopy(_loader)
+
     
-    dic_CoReD = None
-    train_target_dataset = datasets.ImageFolder(dir,transform=None)
-    new_samples = train_target_dataset.samples
-
-    train_target_dataset = CustomDataset(np.array(new_samples)[:,0], np.array(new_samples)[:,1], val_aug)
-    train_target_loader = DataLoader(train_target_dataset,
-                                    batch_size=batch_size,
-                                    shuffle=True,
-                                    num_workers=2,
-                                    pin_memory=True
-                                    )
-    dic = {'test_dataset':train_target_loader}
-
-    return dic, dic_CoReD
+    return validation_loaders
 
 
 
