@@ -11,6 +11,7 @@ def parse_args():
     parser.add_argument("--use_cpu", action=argparse.BooleanOptionalAction, default=False)
     parser.add_argument("--batch_size", default=128)
     parser.add_argument("--resolution", default=128)
+    parser.add_argument("--val_transforms", default='')
 
 
     args = parser.parse_args()
@@ -169,7 +170,6 @@ def evaluate(args, global_writer=None):
 if __name__ == "__main__":
 
     args = parse_args()
-
     if args.use_comet:
          import dotenv
          import comet_ml

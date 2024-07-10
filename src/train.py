@@ -11,6 +11,7 @@ def parse_args():
     parser.add_argument("--target_dataset", help="Target dataset directory")
     parser.add_argument("--use_comet", action=argparse.BooleanOptionalAction, default=False)
     parser.add_argument("--comet_name", help="Experiment name for comet logging")
+    parser.add_argument("--resolution", default=128)
 
     args = parser.parse_args()
     assert args.config_file

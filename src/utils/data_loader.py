@@ -5,6 +5,7 @@ from collections import OrderedDict
 
 import torch
 from torchvision import transforms, datasets
+from torchvision.transforms import v2
 from torch.utils.data import Dataset, DataLoader
 
 from utils.train_utils import set_seeds
@@ -73,6 +74,23 @@ def _get_augs(args, train):
     else:
         normalize_func = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 
+    # Validation transforms for robustness test
+    val_transforms = []
+    if 'val_transforms' in args and args.val_transforms!='':
+        for transform in args.val_transforms.split(","):
+            if transform=="contrast":
+                val_transforms.append(transforms.ColorJitter(contrast=(0.5,2)))
+            elif transform=="brightness":
+                val_transforms.append(transforms.ColorJitter(brightness=(0.5,2)))
+            elif transform=="jpeg":
+                val_transforms.append(v2.JPEG((10,90)))
+            else:
+                error = f'{transform} transform not implemented'
+                raise NotImplementedError(error)
+
+
+
+
     train_aug = None
     if train:
         if bool(args.flip):
@@ -87,12 +105,14 @@ def _get_augs(args, train):
             normalize_func,
         ])
 
-    val_aug = transforms.Compose([
-        resize_func,
-        transforms.ToTensor(),
+    val_aug = transforms.Compose(
+        [resize_func]+
+        val_transforms+
+        [transforms.ToTensor(),
         normalize_func,
     ])
 
+    print(val_aug)
     return train_aug, val_aug
 
 
