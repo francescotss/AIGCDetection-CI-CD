@@ -1,6 +1,4 @@
-# MLOps for Deepfake Detection
-
-![CI Train](https://github.com/francescotss/MLOpsDeepfakeDetection/actions/workflows/model-train-workflow.yml/badge.svg) ![CD Deploy](https://github.com/francescotss/MLOpsDeepfakeDetection/actions/workflows/model-deploy-azure.yml/badge.svg)
+# Continuous fake media detection: adapting deepfake detectors to new generative techniques
 
 ![scheme](https://github.com/francescotss/MLOpsDeepfakeDetection/assets/44005266/5052a819-2f77-43b7-8b8c-8649e12fe1ee)
 
@@ -13,24 +11,9 @@ This project aims to incorporate continuous learning techniques into a real-worl
 
 ## Setup
 
-### Prerequisites
+#### 1. Dependancies
 
-- Azure subscription
-- Azure [service principal](https://learn.microsoft.com/en-us/powershell/azure/create-azure-service-principal-azureps?view=azps-11.3.0)
-
-### Repo Structure
-
-1. `.cloud` Azure Machine Learning IaC files for provisioning resources to train and deploy models
-2. `.github/workflows` GitHub Actions workflows. Used to automatically trigger the training pipeline on pull requests and the deployment pipeline on merges
-3. `pipelines` Azure Machine Learning pipeline definitions
-4. `notebooks` Notebooks for managing dataset upload and performing tests
-5. `src` Python code for train, evaluate, and deploy models
-
-#### 1. Deploy Infrastructure
-
-1. Add service principal credential in the repository secrets
-2. Configure environment parameters in the `.cloud/config-infra-prod.yml` file
-3. Run workflow
+*Stay tuned*
 
 #### 2. Prepare data
 
@@ -62,13 +45,12 @@ dsname/test/
 ------img2.png
 ```
 
-2. Upload the folder (data asset) on the Azure machine learning workspace using the script provided in `notebooks/manage_azure.ipynb` or AZCopy
+
 
 #### 3. Train
 
-1. Using a feature branch, configure the training in `model_config.conf`
-2. Push changes and create a pull request, it will trigger a workflow to run the training pipeline
+*Stay tuned*
 
 #### 4. Validate and deploy
 
-*Work in progress*
+*Stay tuned*
