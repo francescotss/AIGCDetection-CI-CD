@@ -112,7 +112,6 @@ def _get_augs(args, train):
         normalize_func,
     ])
 
-    print(val_aug)
     return train_aug, val_aug
 
 

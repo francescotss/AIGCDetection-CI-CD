@@ -23,6 +23,7 @@ def parse_args():
     parser.add_argument("--target_dataset", help="Target dataset directory")
     parser.add_argument("--use_comet", action=argparse.BooleanOptionalAction, default=False)
     parser.add_argument("--comet_name", help="Experiment name for comet logging")
+    parser.add_argument("--resolution", default=128)
 
     args = parser.parse_args()
     assert args.config_file
@@ -35,7 +36,6 @@ def parse_args():
     parser.set_defaults(**defaults)
     args = parser.parse_args()
 
-    print(args)
     return args
 
 
@@ -243,13 +243,16 @@ def ewc_train(args):
         # Save
         best_acc = max(total_acc,best_acc)
         if  is_best_acc or epoch==0:
-          save_checkpoint({
-              'epoch': epoch + 1,
-              'state_dict': model.state_dict(),
-              'best_acc': best_acc,
-              'optimizer': optimizer.state_dict()},
-            path=args.output_dir
-          )
+          if args.network=="ViT":
+                save_checkpoint(model=model, path=args.output_dir)
+          else:
+            save_checkpoint({
+                'epoch': epoch + 1,
+                'state_dict': model.state_dict(),
+                'best_acc': best_acc,
+                'optimizer': optimizer.state_dict()},
+              path=args.output_dir
+            )
           
           print('Save best model')
 

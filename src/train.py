@@ -85,6 +85,13 @@ def train(args):
     if logger: logger.log_metric('start_acc',test_acc,0)
     print("Start Target Validation ACC: {:.2f}%".format(test_acc))
 
+    for source_name in val_loaders:
+                _, source_acc = test_model(val_loaders[source_name], student_model, criterion, device=device, source_name=source_name)
+                print("[VAL Acc] Source {}: {:.2f}%".format(source_name, source_acc))
+                if logger: logger.log_metric(f'acc/{source_name}_val_acc', source_acc, 0)
+
+
+
 
     # ------- START TRAINING ------- #
     best_acc = 0
