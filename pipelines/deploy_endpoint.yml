@@ -1,4 +1,0 @@
-$schema: https://azuremlschemas.azureedge.net/latest/managedOnlineEndpoint.schema.json
-name: deepfake-detector-ep
-description: deepfake detector online endpoint
-auth_mode: key
